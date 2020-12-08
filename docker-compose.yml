@@ -1,0 +1,66 @@
+version: "3.4"
+
+networks:
+  celerygpu:
+    ipam:
+      config:
+        - subnet: 172.19.205.1/24
+
+x-defaults: &defaults
+  dns:
+    - 8.8.8.8
+    - 8.8.4.4
+  logging:
+    options:
+      max-size: 10mb
+  networks:
+    - celerygpu
+
+services:
+  redis:
+    <<: *defaults
+    image: redis
+    ports:
+      - 6379:6379
+    volumes:
+      - ./data/redis:/data:delegated
+    networks:
+      celerygpu:
+        ipv4_address: "172.19.205.2"
+
+  worker:
+    <<: *defaults
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile
+    command: honcho -f Procfile.worker start
+    ports:
+      - 5555:5555
+    volumes:
+      - ./src:/app/src
+    depends_on:
+      - redis
+    restart: always
+    env_file:
+      - .env
+    networks:
+      celerygpu:
+        ipv4_address: "172.19.205.3"
+
+  api:
+    <<: *defaults
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile
+    ports:
+      - 5000:5000
+    volumes:
+      - ./src:/app/src
+    depends_on:
+      - redis
+    restart: always
+    env_file:
+      - .env
+    networks:
+      celerygpu:
+        ipv4_address: "172.19.205.4"

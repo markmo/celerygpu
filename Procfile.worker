@@ -1,0 +1,1 @@
+worker: nodemon --ext .py --watch /app/src  --polling-interval 5000 --exec "./run_worker.sh"

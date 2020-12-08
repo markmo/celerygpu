@@ -1,0 +1,6 @@
+celery[redis]==4.4.7
+celery_once==3.0.1
+Flask==1.1.2
+honcho==1.0.1
+python-dotenv==0.15.0
+six==1.15.0
